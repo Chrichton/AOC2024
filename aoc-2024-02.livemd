@@ -1,0 +1,64 @@
+<!-- livebook:{"persist_outputs":true} -->
+
+# AoC 2024/02
+
+```elixir
+Mix.install([
+  {:kino, "~> 0.14.2"}
+])
+```
+
+## Section
+
+```elixir
+input = Kino.Input.textarea("input")
+```
+
+```elixir
+defmodule Day2 do
+  defp parse_input(input) do
+    input |> String.split("\n")
+  end
+
+  def solve1(input) do
+    parse_input(input)
+  end
+
+  def solve2(input) do
+    input
+    |> parse_input()
+  end
+end
+```
+
+<!-- livebook:{"output":true} -->
+
+```
+{:module, Day2, <<70, 79, 82, 49, 0, 0, 7, ...>>, {:solve2, 1}}
+```
+
+```elixir
+Kino.Input.read(input)
+|> Day2.solve1()
+```
+
+<!-- livebook:{"output":true} -->
+
+```
+[""]
+```
+
+```elixir
+Kino.Input.read(input)
+|> Day2.solve2()
+```
+
+<!-- livebook:{"output":true} -->
+
+```
+[""]
+```
+
+```elixir
+
+```
