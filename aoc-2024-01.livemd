@@ -24,12 +24,15 @@ defmodule Day1 do
     end)
   end
 
-
   def solve1(input) do
     parse_input(input)
-    |> columns()
+    |> transpose()
     |> distances()
     |> Enum.sum()
+  end
+
+  defp transpose(list_of_lists) do
+    Enum.zip_with(list_of_lists, &Function.identity/1)
   end
 
   defp columns(list_of_pairs) do
@@ -39,7 +42,7 @@ defmodule Day1 do
     end)
   end
 
-  defp distances({left_column, right_column}) do
+  defp distances([left_column, right_column]) do
     Enum.zip(Enum.sort(left_column), Enum.sort(right_column))
     |> Enum.map(fn {left, right} -> abs(left - right) end)
   end
@@ -66,7 +69,7 @@ end
 <!-- livebook:{"output":true} -->
 
 ```
-{:module, Day1, <<70, 79, 82, 49, 0, 0, 13, ...>>, {:similarity_score, 1}}
+{:module, Day1, <<70, 79, 82, 49, 0, 0, 14, ...>>, {:similarity_score, 1}}
 ```
 
 ```elixir
