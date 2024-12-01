@@ -1,0 +1,104 @@
+<!-- livebook:{"persist_outputs":true} -->
+
+# AoC 2024/01
+
+```elixir
+Mix.install([
+  {:kino, "~> 0.14.2"}
+])
+```
+
+## Section
+
+```elixir
+input = Kino.Input.textarea("input")
+```
+
+```elixir
+defmodule Day1 do
+  defp parse_input(input) do
+    input |> String.split("\n")
+    |> Enum.map(fn str -> 
+      [left_str, right_str] = String.split(str, "   ")
+      [String.to_integer(left_str), String.to_integer(right_str)]
+    end)
+  end
+
+
+  def solve1(input) do
+    parse_input(input)
+    |> columns()
+    |> distances()
+    |> Enum.sum()
+  end
+
+  defp columns(list_of_pairs) do
+    {_left_col, _right_col} = list_of_pairs
+     |> Enum.reduce({[], []}, fn [left, right], {lefts, rights} ->
+       {[left | lefts], [right | rights]}
+    end)
+  end
+
+  defp distances({left_column, right_column}) do
+    Enum.zip(Enum.sort(left_column), Enum.sort(right_column))
+    |> Enum.map(fn {left, right} -> abs(left - right) end)
+  end
+
+  def solve2(input) do
+    input
+    |> parse_input()
+    |> columns()
+    |> similarity_score()
+    |> Enum.sum()
+  end
+
+   defp similarity_score({left_column, right_column}) do
+     right_frequencies = Enum.frequencies(right_column)
+     
+     left_column
+     |> Enum.map(fn left -> 
+       left * Map.get(right_frequencies, left, 0)
+     end)
+   end
+end
+```
+
+<!-- livebook:{"output":true} -->
+
+```
+{:module, Day1, <<70, 79, 82, 49, 0, 0, 13, ...>>, {:similarity_score, 1}}
+```
+
+```elixir
+Kino.Input.read(input)
+|> Day1.solve1()
+```
+
+<!-- livebook:{"output":true} -->
+
+```
+1889772
+```
+
+```elixir
+Kino.Input.read(input)
+|> Day1.solve2()
+```
+
+<!-- livebook:{"output":true} -->
+
+```
+23228917
+```
+
+```elixir
+str = "66845   37619"
+String.split(str, "   ")
+
+```
+
+<!-- livebook:{"output":true} -->
+
+```
+["66845", "37619"]
+```
