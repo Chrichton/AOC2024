@@ -17,16 +17,97 @@ input = Kino.Input.textarea("input")
 ```elixir
 defmodule Day2 do
   defp parse_input(input) do
-    input |> String.split("\n")
+    input 
+    |> String.split("\n")
+    |> Enum.map(fn row -> 
+      String.split(row, " ")
+      |> Enum.map(fn level -> String.to_integer(level) end)
+        
+    end)
   end
 
   def solve1(input) do
     parse_input(input)
+    |> find_safe_levels()
+    |> Enum.count()
   end
 
+  defp find_safe_levels(levels_list) do
+    levels_list
+    |> Enum.map(fn levels -> safe?(levels) end)
+    |> Enum.filter(fn {result, _level} -> result end)
+  end
+
+  def safe?(levels) do
+    levels
+    |> Enum.reduce_while({:none, 0}, fn level, {inc_dec, last_level} ->     
+      if last_level == 0 do
+        {:cont, {:none, level}} 
+      else
+        if abs(last_level - level) in 1..3 do
+          if inc_dec == :none do
+            if level > last_level, do:
+              {:cont, {:inc, level}}, else:
+              {:cont, {:dec, level}}
+          else
+            if inc_dec == :inc do
+              if level > last_level, do:
+                {:cont, {:inc, level}}, else:
+                {:halt, {false, levels}}
+            else
+              if level < last_level, do:
+                {:cont, {:dec, level}}, else:
+                {:halt, {false, levels}}  
+            end
+          end
+        else
+          {:halt, {false, levels}}
+        end
+      end
+    end)
+  end
+  
   def solve2(input) do
-    input
+    parsed = input
     |> parse_input()
+
+    safe_count =
+      parsed
+      |> find_safe_levels()
+      |> Enum.count()
+    
+    unsafe_count = 
+      parsed 
+      |> find_unsafe_levels()
+      |> find_safe_levels_by_dampener()
+      |> Enum.count()
+
+    count = safe_count + unsafe_count
+
+    count
+  end
+
+  defp find_unsafe_levels(levels_list) do
+    levels_list
+    |> Enum.map(fn levels -> safe?(levels) end)
+    |> Enum.reject(fn {result, _level} -> result end)
+    |> Enum.map(fn {_result, level} -> level end)
+  end
+
+  defp find_safe_levels_by_dampener(levels_list) do
+    levels_list
+    |> Enum.map(&safe_level_by_dampener?/1)
+    |> Enum.filter(fn {result, _level} -> result end)
+  end
+
+  def safe_level_by_dampener?(levels) do
+    0..(Enum.count(levels) -1)
+    |> Enum.reduce_while(false, fn index, _safe ->
+      {result, levels} = safe?(List.delete_at(levels, index))
+      if result, do:
+        {:halt, {true, levels}}, else:
+        {:cont, {false, levels}}
+    end)
   end
 end
 ```
@@ -34,7 +115,7 @@ end
 <!-- livebook:{"output":true} -->
 
 ```
-{:module, Day2, <<70, 79, 82, 49, 0, 0, 7, ...>>, {:solve2, 1}}
+{:module, Day2, <<70, 79, 82, 49, 0, 0, 21, ...>>, {:safe_level_by_dampener?, 1}}
 ```
 
 ```elixir
@@ -45,7 +126,7 @@ Kino.Input.read(input)
 <!-- livebook:{"output":true} -->
 
 ```
-[""]
+486
 ```
 
 ```elixir
@@ -56,9 +137,59 @@ Kino.Input.read(input)
 <!-- livebook:{"output":true} -->
 
 ```
-[""]
+540
 ```
 
 ```elixir
+Day2.safe?([1,2,7,8,9])
+```
 
+<!-- livebook:{"output":true} -->
+
+```
+{false, [1, 2, 7, 8, 9]}
+```
+
+```elixir
+Day2.safe?([1, 3, 2, 4, 5])
+```
+
+<!-- livebook:{"output":true} -->
+
+```
+{false, [1, 3, 2, 4, 5]}
+```
+
+```elixir
+Day2.safe_level_by_dampener?([1, 3, 2, 4, 5])
+```
+
+<!-- livebook:{"output":true} -->
+
+```
+{true, 5}
+```
+
+```elixir
+list1 = [
+  false: [1, 2, 7, 8, 9],
+]
+
+[{result, list}] = list1
+```
+
+<!-- livebook:{"output":true} -->
+
+```
+[false: [1, 2, 7, 8, 9]]
+```
+
+```elixir
+[{:false, [1, 2, 7, 8, 9]}]
+```
+
+<!-- livebook:{"output":true} -->
+
+```
+[false: [1, 2, 7, 8, 9]]
 ```
