@@ -84,7 +84,7 @@ matches = Regex.scan(~r/mul\([0-9]+,[0-9]+\)/, "xmul(2,4)&mul[3,7]!^don't()_mul(
 ```
 
 ```elixir
-params = Regex.run(~r/[0-9]+,[0-9]+ /, "mul(2,4)")
+params = Regex.run(~r/[0-9]+,[0-9]+/, "mul(2,4)")
 ```
 
 <!-- livebook:{"output":true} -->
@@ -97,7 +97,7 @@ params = Regex.run(~r/[0-9]+,[0-9]+ /, "mul(2,4)")
 
 ```elixir
 Kino.Input.read(input)
-|> Day2.solve2()
+|> Day3.solve2()
 ```
 
 <!-- livebook:{"output":true} -->
