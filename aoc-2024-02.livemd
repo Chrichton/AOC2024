@@ -22,7 +22,6 @@ defmodule Day2 do
     |> Enum.map(fn row -> 
       String.split(row, " ")
       |> Enum.map(fn level -> String.to_integer(level) end)
-        
     end)
   end
 
