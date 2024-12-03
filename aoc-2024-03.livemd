@@ -22,26 +22,24 @@ defmodule Day3 do
 
   def solve1(input) do
     parse_input(input)
-    |> get_matches()
-    |> Enum.flat_map(fn [match] -> 
+    |> get_matches1()
+    |> Enum.map(fn [match] -> 
       get_params(match)
     end)
-    |> calc_sum_of_products()
+    |> calc_sum_of_products1()
   end
 
-  defp get_matches(input) do
+  defp get_matches1(input) do
     Regex.scan(~r/mul\([0-9]+,[0-9]+\)/, input)
   end
 
   defp get_params(match) do
-    Regex.run(~r/[0-9]+,[0-9]+/, match)
-    |> Enum.map(fn params_str ->
-      [x,y] = String.split(params_str, ",")
-      {String.to_integer(x), String.to_integer(y)}
-    end)
+    [params_str] = Regex.run(~r/[0-9]+,[0-9]+/, match)
+    [x,y] = String.split(params_str, ",")
+    {String.to_integer(x), String.to_integer(y)}
   end
 
-  defp calc_sum_of_products(params) do
+  defp calc_sum_of_products1(params) do
     Enum.reduce(params, 0, fn {x,y}, acc -> 
       acc + x * y
     end)
@@ -50,6 +48,37 @@ defmodule Day3 do
   def solve2(input) do
     input
     |> parse_input()
+    |> get_matches2()
+    |> Enum.map(fn [match] -> 
+      get_commands_params(match)
+    end)
+    |> calc_sum_of_products2()
+  end
+
+  defp get_matches2(input) do
+    Regex.scan(~r/mul\([0-9]+,[0-9]+\)|do\(\)|don't\(\)/, input)
+  end
+
+  defp get_commands_params(match) do
+    cond do
+      match == "don't()" -> :mul_disabled
+      match == "do()" -> :mul_enabled
+      String.starts_with?(match, "mul(") -> get_params(match)
+    end
+  end
+
+  defp calc_sum_of_products2(params) do
+    Enum.reduce(params, {0, :mul_enabled}, fn command, {acc_sum, acc_mul_state} -> 
+      case command do
+        :mul_enabled -> {acc_sum, :mul_enabled}
+        :mul_disabled -> {acc_sum, :mul_disabled}
+        _ -> {x,y} = command
+          if acc_mul_state == :mul_disabled, do:
+            {acc_sum, acc_mul_state}, else:
+            {acc_sum + x * y, acc_mul_state}
+      end
+    end)
+    |> elem(0)
   end
 end
 ```
@@ -57,7 +86,7 @@ end
 <!-- livebook:{"output":true} -->
 
 ```
-{:module, Day3, <<70, 79, 82, 49, 0, 0, 13, ...>>, {:solve2, 1}}
+{:module, Day3, <<70, 79, 82, 49, 0, 0, 18, ...>>, {:calc_sum_of_products2, 1}}
 ```
 
 ## solve1
@@ -70,7 +99,7 @@ Kino.Input.read(input)
 <!-- livebook:{"output":true} -->
 
 ```
-161
+161289189
 ```
 
 ```elixir
@@ -103,15 +132,15 @@ Kino.Input.read(input)
 <!-- livebook:{"output":true} -->
 
 ```
-"xmul(2,4)&mul[3,7]!^don't()_mul(5,5)+mul(32,64](mul(11,8)undo()?mul(8,5))"
+83595109
 ```
 
 ```elixir
-matches = Regex.scan(~r/mul\([0-9]+,[0-9]+\)/, "xmul(2,4)%&mul[3,7]!@^do_not_mul(5,5)+mul(32,64]then(mul(11,8)mul(8,5))")
+Regex.scan(~r/mul\([0-9]+,[0-9]+\)|do\(\)|don't\(\)/, "xmul(2,4)&mul[3,7]!^don't()_mul(5,5)+mul(32,64](mul(11,8)undo()?mul(8,5))")
 ```
 
 <!-- livebook:{"output":true} -->
 
 ```
-[["mul(2,4)"], ["mul(5,5)"], ["mul(11,8)"], ["mul(8,5)"]]
+[["mul(2,4)"], ["don't()"], ["mul(5,5)"], ["mul(11,8)"], ["do()"], ["mul(8,5)"]]
 ```
