@@ -1,0 +1,117 @@
+<!-- livebook:{"persist_outputs":true} -->
+
+# AoC 2024/03
+
+```elixir
+Mix.install([
+  {:kino, "~> 0.14.2"}
+])
+```
+
+## Section
+
+```elixir
+input = Kino.Input.textarea("input")
+```
+
+```elixir
+defmodule Day3 do
+  defp parse_input(input) do
+    input
+  end
+
+  def solve1(input) do
+    parse_input(input)
+    |> get_matches()
+    |> Enum.flat_map(fn [match] -> 
+      get_params(match)
+    end)
+    |> calc_sum_of_products()
+  end
+
+  defp get_matches(input) do
+    Regex.scan(~r/mul\([0-9]+,[0-9]+\)/, input)
+  end
+
+  defp get_params(match) do
+    Regex.run(~r/[0-9]+,[0-9]+/, match)
+    |> Enum.map(fn params_str ->
+      [x,y] = String.split(params_str, ",")
+      {String.to_integer(x), String.to_integer(y)}
+    end)
+  end
+
+  defp calc_sum_of_products(params) do
+    Enum.reduce(params, 0, fn {x,y}, acc -> 
+      acc + x * y
+    end)
+  end
+  
+  def solve2(input) do
+    input
+    |> parse_input()
+  end
+end
+```
+
+<!-- livebook:{"output":true} -->
+
+```
+{:module, Day3, <<70, 79, 82, 49, 0, 0, 13, ...>>, {:solve2, 1}}
+```
+
+## solve1
+
+```elixir
+Kino.Input.read(input)
+|> Day3.solve1()
+```
+
+<!-- livebook:{"output":true} -->
+
+```
+161
+```
+
+```elixir
+matches = Regex.scan(~r/mul\([0-9]+,[0-9]+\)/, "xmul(2,4)&mul[3,7]!^don't()_mul(5,5)+mul(32,64](mul(11,8)undo()?mul(8,5))")
+```
+
+<!-- livebook:{"output":true} -->
+
+```
+[["mul(2,4)"], ["mul(5,5)"], ["mul(11,8)"], ["mul(8,5)"]]
+```
+
+```elixir
+params = Regex.run(~r/[0-9]+,[0-9]+ /, "mul(2,4)")
+```
+
+<!-- livebook:{"output":true} -->
+
+```
+["2,4"]
+```
+
+## solve2
+
+```elixir
+Kino.Input.read(input)
+|> Day2.solve2()
+```
+
+<!-- livebook:{"output":true} -->
+
+```
+"xmul(2,4)&mul[3,7]!^don't()_mul(5,5)+mul(32,64](mul(11,8)undo()?mul(8,5))"
+```
+
+```elixir
+matches = Regex.scan(~r/mul\([0-9]+,[0-9]+\)/, "xmul(2,4)%&mul[3,7]!@^do_not_mul(5,5)+mul(32,64]then(mul(11,8)mul(8,5))")
+```
+
+<!-- livebook:{"output":true} -->
+
+```
+[["mul(2,4)"], ["mul(5,5)"], ["mul(11,8)"], ["mul(8,5)"]]
+```
