@@ -1,0 +1,259 @@
+<!-- livebook:{"persist_outputs":true} -->
+
+# AoC 2024/04
+
+```elixir
+Mix.install([
+  {:kino, "~> 0.14.2"}
+])
+```
+
+## Section
+
+```elixir
+input = Kino.Input.textarea("input")
+```
+
+```elixir
+defmodule Day4 do
+  defp parse_input(input) do
+    input 
+    |> String.split("\n")
+    |> Enum.map(fn line -> String.graphemes(line) end)
+  end
+
+  def solve1(input) do
+    input
+    |> parse_input()
+    |> xmas_count()
+  end
+  
+  defp xmas_count(grid) do
+    horizontal_count = 
+      grid
+      |> Enum.map(&Enum.join/1)
+      |> Enum.map(&row_count/1)
+      |> Enum.sum()
+      
+
+    vertical_count =
+      grid
+      |> transpose()
+      |> Enum.map(&Enum.join/1)
+      |> Enum.map(&row_count/1)
+      |> Enum.sum()
+
+    {horizontal_count, vertical_count}
+
+    row_count = Enum.count(grid)
+
+    diagonal_left_right_count = 
+      Enum.map(0..(row_count-3), fn col ->
+        Enum.map(0..(row_count-1-col), fn row ->
+          Enum.at(grid, row) |> Enum.at(col+row)
+        end)
+        |> Enum.join()
+      end)
+      |> Enum.map(&row_count/1)
+      |> Enum.sum()
+    
+    diagonal_right_left_count =
+      Enum.map((row_count-1)..2, fn col ->
+        Enum.map(0..(row_count-1-(row_count-col)), fn row ->
+          Enum.at(grid, row) |> Enum.at(col - row)
+        end)
+        |> Enum.join()
+      end)
+      |> Enum.map(&row_count/1)
+      |> Enum.sum()
+
+    {horizontal_count, vertical_count, diagonal_left_right_count, diagonal_right_left_count}
+  end
+
+  defp row_count(row) do
+    regex = ~r/[^X]*X[^M]*M[^A]*A[^S]*S/
+    reverse_regex = ~r/[^S]*S[^A]*A[^M]*M[^X]*X/
+    
+    left_right_count = 
+      regex
+      |> Regex.scan(row) 
+      |> Enum.count()
+      |> IO.inspect(label: "LR")
+
+    right_left_count = 
+      reverse_regex
+      |> Regex.scan(String.reverse(row)) 
+      |> Enum.count()
+
+    left_right_count + right_left_count
+  end
+  
+  defp transpose(grid) do
+    Enum.zip_with(grid, &Function.identity/1)
+  end
+  
+  def solve2(input) do
+    input
+    |> parse_input()
+  end
+end
+```
+
+<!-- livebook:{"output":true} -->
+
+```
+{:module, Day4, <<70, 79, 82, 49, 0, 0, 18, ...>>, {:solve2, 1}}
+```
+
+## solve1
+
+```elixir
+Kino.Input.read(input)
+|> Day4.solve1()
+```
+
+<!-- livebook:{"output":true} -->
+
+```
+LR: 1
+LR: 0
+LR: 0
+LR: 0
+LR: 1
+LR: 0
+LR: 0
+LR: 1
+LR: 0
+LR: 1
+LR: 0
+LR: 0
+LR: 0
+LR: 0
+LR: 0
+LR: 0
+LR: 0
+LR: 0
+LR: 0
+LR: 1
+LR: 1
+LR: 0
+LR: 0
+LR: 1
+LR: 1
+LR: 0
+LR: 0
+LR: 0
+LR: 0
+LR: 0
+LR: 0
+LR: 0
+LR: 0
+LR: 0
+LR: 0
+LR: 0
+```
+
+<!-- livebook:{"output":true} -->
+
+```
+{8, 2, 6, 0}
+```
+
+```elixir
+
+```
+
+<!-- livebook:{"output":true} -->
+
+```
+nil
+```
+
+## solve2
+
+```elixir
+Kino.Input.read(input)
+|> Day4.solve2()
+```
+
+<!-- livebook:{"output":true} -->
+
+```
+[[]]
+```
+
+```elixir
+Regex.scan(~r/X.*MAS|SAMX/, "HALXAMASo")
+```
+
+<!-- livebook:{"output":true} -->
+
+```
+[["XAMAS"]]
+```
+
+```elixir
+grid = [
+  ["M", "M", "M", "S", "X", "X", "M", "A", "S", "M"],
+  ["M", "S", "A", "M", "X", "M", "S", "M", "S", "A"],
+  ["A", "M", "X", "S", "X", "M", "A", "A", "M", "M"],
+  ["M", "S", "A", "M", "A", "S", "M", "S", "M", "X"],
+  ["X", "M", "A", "S", "A", "M", "X", "A", "M", "M"],
+  ["X", "X", "A", "M", "M", "X", "X", "A", "M", "A"],
+  ["S", "M", "S", "M", "S", "A", "S", "X", "S", "S"],
+  ["S", "A", "X", "A", "M", "A", "S", "A", "A", "A"],
+  ["M", "A", "M", "M", "M", "X", "M", "M", "M", "M"],
+  ["M", "X", "M", "X", "A", "X", "M", "A", "S", "X"]
+]
+```
+
+<!-- livebook:{"output":true} -->
+
+```
+[
+  ["M", "M", "M", "S", "X", "X", "M", "A", "S", "M"],
+  ["M", "S", "A", "M", "X", "M", "S", "M", "S", "A"],
+  ["A", "M", "X", "S", "X", "M", "A", "A", "M", "M"],
+  ["M", "S", "A", "M", "A", "S", "M", "S", "M", "X"],
+  ["X", "M", "A", "S", "A", "M", "X", "A", "M", "M"],
+  ["X", "X", "A", "M", "M", "X", "X", "A", "M", "A"],
+  ["S", "M", "S", "M", "S", "A", "S", "X", "S", "S"],
+  ["S", "A", "X", "A", "M", "A", "S", "A", "A", "A"],
+  ["M", "A", "M", "M", "M", "X", "M", "M", "M", "M"],
+  ["M", "X", "M", "X", "A", "X", "M", "A", "S", "X"]
+]
+```
+
+```elixir
+xs = Day4.find_x_chars(grid)
+```
+
+<!-- livebook:{"output":true} -->
+
+```
+[
+  {0, 4},
+  {0, 5},
+  {1, 4},
+  {2, 2},
+  {2, 4},
+  {3, 9},
+  {4, 0},
+  {4, 6},
+  {5, 0},
+  {5, 1},
+  {5, 5},
+  {5, 6},
+  {6, 7},
+  {7, 2},
+  {8, 5},
+  {9, 1},
+  {9, 3},
+  {9, 5},
+  {9, 9}
+]
+```
+
+```elixir
+row = Enum.at(grid, )
+```
