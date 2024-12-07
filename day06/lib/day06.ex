@@ -104,14 +104,15 @@ defmodule Day06 do
         x <- 0..max_x,
         y <- 0..max_y,
         obstacles = MapSet.put(obstacles, {x - 1, y}),
-        do: find_loop(start, obstacles, max_x, max_y, MapSet.new([{start, :north}]))
+        do: loop?(start, obstacles, max_x, max_y, MapSet.new([{start, :north}]))
       )
       |> Enum.filter(& &1)
       |> Enum.count()
     end)
   end
 
-  defp find_loop(start, obstacles, max_x, max_y, visited) do
+  defp loop?(start, obstacles, max_x, max_y, visited) do
+    obstacles = MapSet.reject(obstacles, fn {x, _y} -> x < 0 end)
     next_step_find_loop?({start, :north}, start, obstacles, max_x, max_y, visited)
   end
 
