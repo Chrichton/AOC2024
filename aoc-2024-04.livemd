@@ -43,8 +43,6 @@ defmodule Day4 do
       |> Enum.map(&row_count/1)
       |> Enum.sum()
 
-    {horizontal_count, vertical_count}
-
     row_count = Enum.count(grid)
 
     diagonal_left_right_count = 
@@ -59,7 +57,7 @@ defmodule Day4 do
     
     diagonal_right_left_count =
       Enum.map((row_count-1)..2, fn col ->
-        Enum.map(0..(row_count-1-(row_count-col)), fn row ->
+        Enum.map(0..(row_count-(row_count-col)), fn row ->
           Enum.at(grid, row) |> Enum.at(col - row)
         end)
         |> Enum.join()
@@ -71,21 +69,18 @@ defmodule Day4 do
   end
 
   defp row_count(row) do
-    regex = ~r/[^X]*X[^M]*M[^A]*A[^S]*S/
-    reverse_regex = ~r/[^S]*S[^A]*A[^M]*M[^X]*X/
-    
-    left_right_count = 
-      regex
-      |> Regex.scan(row) 
-      |> Enum.count()
-      |> IO.inspect(label: "LR")
-
-    right_left_count = 
-      reverse_regex
-      |> Regex.scan(String.reverse(row)) 
-      |> Enum.count()
+    left_right_count = xmass_count(row)
+    right_left_count = xmass_count(row |> String.reverse()) 
 
     left_right_count + right_left_count
+  end
+
+  defp xmass_count(string) do
+    string
+    |> String.graphemes()
+    |> Enum.chunk_every(4, 1, :discard)
+    |> Enum.filter(fn chunk -> Enum.join(chunk) == "XMAS" end)
+    |> Enum.count()
   end
   
   defp transpose(grid) do
@@ -102,7 +97,7 @@ end
 <!-- livebook:{"output":true} -->
 
 ```
-{:module, Day4, <<70, 79, 82, 49, 0, 0, 18, ...>>, {:solve2, 1}}
+{:module, Day4, <<70, 79, 82, 49, 0, 0, 17, ...>>, {:solve2, 1}}
 ```
 
 ## solve1
@@ -115,58 +110,72 @@ Kino.Input.read(input)
 <!-- livebook:{"output":true} -->
 
 ```
-LR: 1
-LR: 0
-LR: 0
-LR: 0
-LR: 1
-LR: 0
-LR: 0
-LR: 1
-LR: 0
-LR: 1
-LR: 0
-LR: 0
-LR: 0
-LR: 0
-LR: 0
-LR: 0
-LR: 0
-LR: 0
-LR: 0
-LR: 1
-LR: 1
-LR: 0
-LR: 0
-LR: 1
-LR: 1
-LR: 0
-LR: 0
-LR: 0
-LR: 0
-LR: 0
-LR: 0
-LR: 0
-LR: 0
-LR: 0
-LR: 0
-LR: 0
-```
-
-<!-- livebook:{"output":true} -->
-
-```
-{8, 2, 6, 0}
+{5, 3, 3, 1}
 ```
 
 ```elixir
+["MSAMMMMXA", "SMASAMSA", "ASMASAM", "MMXMAX", "XXSAM", "XMXS", "SAM"]
+```
+
+```elixir
+defmodule Test do
+  def find_xmas(string) do
+    string
+    |> String.graphemes()
+    |> Enum.chunk_every(4, 1, :discard)
+    |> Enum.filter(fn chunk -> Enum.join(chunk) == "XMAS" end)
+    |> Enum.count()
+  end
+end
+```
+
+<!-- livebook:{"output":true} -->
+
+```
+{:module, Test, <<70, 79, 82, 49, 0, 0, 7, ...>>, {:find_xmas, 1}}
+```
+
+```elixir
+string = "SAXAMASAAAXMASA"
+matches = Regex.scan(~r/\bXMAS\b/, string)
+matches = Regex.scan(~r/XMAS(?![XMAS])/, string)
+
+Test.find_xmas(string)
+```
+
+<!-- livebook:{"output":true} -->
+
+```
+1
+```
+
+```elixir
+string = "Happy XMAS to all, and to all a good XMAS!"
+matches = Regex.scan(~r/(?<![XMAS])\bXMAS\b(?![XMAS])/, string)
+matches = Regex.scan(~r/XMAS(?![XMAS])/, string)
+
+Test.find_xmas(string)
+```
+
+<!-- livebook:{"output":true} -->
+
+```
+2
+```
+
+```elixir
+string = "XMASXMASXMAS"
+matches = Regex.scan(~r/(?<![XMAS])\bXMAS\b(?![XMAS])/, string)
+matches = Regex.scan(~r/XMAS(?![XMAS])/, string)
+
+Test.find_xmas(string)
 
 ```
 
 <!-- livebook:{"output":true} -->
 
 ```
-nil
+0
 ```
 
 ## solve2
