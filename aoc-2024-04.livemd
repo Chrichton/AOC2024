@@ -16,7 +16,7 @@ input = Kino.Input.textarea("input")
 
 ```elixir
 defmodule Day4 do
-  defp parse_input(input) do
+  def parse_input(input) do
     input 
     |> String.split("\n")
     |> Enum.map(fn line -> String.graphemes(line) end)
@@ -57,15 +57,26 @@ defmodule Day4 do
     
     diagonal_right_left_count =
       Enum.map((row_count-1)..2, fn col ->
-        Enum.map(0..(row_count-(row_count-col)), fn row ->
+        Enum.map(0..col, fn row ->
           Enum.at(grid, row) |> Enum.at(col - row)
+        end)
+        |> Enum.join()
+      end)
+    |> Enum.map(&row_count/1)
+    |> Enum.sum()
+
+    diagonal_right_left_bottom_count =
+      Enum.map(0..(row_count-1), fn col ->
+        Enum.map((row_count-1)..col, fn row ->
+          Enum.at(grid, row) |> Enum.at((row_count-1)-row+col)
         end)
         |> Enum.join()
       end)
       |> Enum.map(&row_count/1)
       |> Enum.sum()
-
-    {horizontal_count, vertical_count, diagonal_left_right_count, diagonal_right_left_count}
+    
+    {horizontal_count, vertical_count, diagonal_left_right_count, 
+      diagonal_right_left_count, diagonal_right_left_bottom_count}
   end
 
   defp row_count(row) do
@@ -97,7 +108,7 @@ end
 <!-- livebook:{"output":true} -->
 
 ```
-{:module, Day4, <<70, 79, 82, 49, 0, 0, 17, ...>>, {:solve2, 1}}
+{:module, Day4, <<70, 79, 82, 49, 0, 0, 19, ...>>, {:solve2, 1}}
 ```
 
 ## solve1
@@ -110,11 +121,54 @@ Kino.Input.read(input)
 <!-- livebook:{"output":true} -->
 
 ```
-{5, 3, 3, 1}
+{5, 3, 3, 1, 4}
 ```
 
 ```elixir
-["MSAMMMMXA", "SMASAMSA", "ASMASAM", "MMXMAX", "XXSAM", "XMXS", "SAM"]
+grid = Kino.Input.read(input)
+|> Day4.parse_input()
+```
+
+<!-- livebook:{"output":true} -->
+
+```
+[
+  ["M", "M", "M", "S", "X", "X", "M", "A", "S", "M"],
+  ["M", "S", "A", "M", "X", "M", "S", "M", "S", "A"],
+  ["A", "M", "X", "S", "X", "M", "A", "A", "M", "M"],
+  ["M", "S", "A", "M", "A", "S", "M", "S", "M", "X"],
+  ["X", "M", "A", "S", "A", "M", "X", "A", "M", "M"],
+  ["X", "X", "A", "M", "M", "X", "X", "A", "M", "A"],
+  ["S", "M", "S", "M", "S", "A", "S", "X", "S", "S"],
+  ["S", "A", "X", "A", "M", "A", "S", "A", "A", "A"],
+  ["M", "A", "M", "M", "M", "X", "M", "M", "M", "M"],
+  ["M", "X", "M", "X", "A", "X", "M", "A", "S", "X"]
+]
+```
+
+```elixir
+Enum.map(0..9, fn col ->
+  Enum.map(9..col, fn row ->
+    {row, 9-row+col}
+  end)
+end)
+```
+
+<!-- livebook:{"output":true} -->
+
+```
+[
+  [{9, 0}, {8, 1}, {7, 2}, {6, 3}, {5, 4}, {4, 5}, {3, 6}, {2, 7}, {1, 8}, {0, 9}],
+  [{9, 1}, {8, 2}, {7, 3}, {6, 4}, {5, 5}, {4, 6}, {3, 7}, {2, 8}, {1, 9}],
+  [{9, 2}, {8, 3}, {7, 4}, {6, 5}, {5, 6}, {4, 7}, {3, 8}, {2, 9}],
+  [{9, 3}, {8, 4}, {7, 5}, {6, 6}, {5, 7}, {4, 8}, {3, 9}],
+  [{9, 4}, {8, 5}, {7, 6}, {6, 7}, {5, 8}, {4, 9}],
+  [{9, 5}, {8, 6}, {7, 7}, {6, 8}, {5, 9}],
+  [{9, 6}, {8, 7}, {7, 8}, {6, 9}],
+  [{9, 7}, {8, 8}, {7, 9}],
+  [{9, 8}, {8, 9}],
+  [{9, 9}]
+]
 ```
 
 ```elixir
@@ -136,46 +190,28 @@ end
 ```
 
 ```elixir
-string = "SAXAMASAAAXMASA"
-matches = Regex.scan(~r/\bXMAS\b/, string)
-matches = Regex.scan(~r/XMAS(?![XMAS])/, string)
-
-Test.find_xmas(string)
+Enum.map(0..9, fn col ->
+  Enum.map(9..col//-1, fn row ->
+    {row-col, 9-row}
+    end)
+  end)
 ```
 
 <!-- livebook:{"output":true} -->
 
 ```
-1
-```
-
-```elixir
-string = "Happy XMAS to all, and to all a good XMAS!"
-matches = Regex.scan(~r/(?<![XMAS])\bXMAS\b(?![XMAS])/, string)
-matches = Regex.scan(~r/XMAS(?![XMAS])/, string)
-
-Test.find_xmas(string)
-```
-
-<!-- livebook:{"output":true} -->
-
-```
-2
-```
-
-```elixir
-string = "XMASXMASXMAS"
-matches = Regex.scan(~r/(?<![XMAS])\bXMAS\b(?![XMAS])/, string)
-matches = Regex.scan(~r/XMAS(?![XMAS])/, string)
-
-Test.find_xmas(string)
-
-```
-
-<!-- livebook:{"output":true} -->
-
-```
-0
+[
+  [{9, 0}, {8, 1}, {7, 2}, {6, 3}, {5, 4}, {4, 5}, {3, 6}, {2, 7}, {1, 8}, {0, 9}],
+  [{8, 0}, {7, 1}, {6, 2}, {5, 3}, {4, 4}, {3, 5}, {2, 6}, {1, 7}, {0, 8}],
+  [{7, 0}, {6, 1}, {5, 2}, {4, 3}, {3, 4}, {2, 5}, {1, 6}, {0, 7}],
+  [{6, 0}, {5, 1}, {4, 2}, {3, 3}, {2, 4}, {1, 5}, {0, 6}],
+  [{5, 0}, {4, 1}, {3, 2}, {2, 3}, {1, 4}, {0, 5}],
+  [{4, 0}, {3, 1}, {2, 2}, {1, 3}, {0, 4}],
+  [{3, 0}, {2, 1}, {1, 2}, {0, 3}],
+  [{2, 0}, {1, 1}, {0, 2}],
+  [{1, 0}, {0, 1}],
+  [{0, 0}]
+]
 ```
 
 ## solve2
@@ -188,7 +224,18 @@ Kino.Input.read(input)
 <!-- livebook:{"output":true} -->
 
 ```
-[[]]
+[
+  ["M", "M", "M", "S", "X", "X", "M", "A", "S", "M"],
+  ["M", "S", "A", "M", "X", "M", "S", "M", "S", "A"],
+  ["A", "M", "X", "S", "X", "M", "A", "A", "M", "M"],
+  ["M", "S", "A", "M", "A", "S", "M", "S", "M", "X"],
+  ["X", "M", "A", "S", "A", "M", "X", "A", "M", "M"],
+  ["X", "X", "A", "M", "M", "X", "X", "A", "M", "A"],
+  ["S", "M", "S", "M", "S", "A", "S", "X", "S", "S"],
+  ["S", "A", "X", "A", "M", "A", "S", "A", "A", "A"],
+  ["M", "A", "M", "M", "M", "X", "M", "M", "M", "M"],
+  ["M", "X", "M", "X", "A", "X", "M", "A", "S", "X"]
+]
 ```
 
 ```elixir
@@ -235,32 +282,6 @@ grid = [
 
 ```elixir
 xs = Day4.find_x_chars(grid)
-```
-
-<!-- livebook:{"output":true} -->
-
-```
-[
-  {0, 4},
-  {0, 5},
-  {1, 4},
-  {2, 2},
-  {2, 4},
-  {3, 9},
-  {4, 0},
-  {4, 6},
-  {5, 0},
-  {5, 1},
-  {5, 5},
-  {5, 6},
-  {6, 7},
-  {7, 2},
-  {8, 5},
-  {9, 1},
-  {9, 3},
-  {9, 5},
-  {9, 9}
-]
 ```
 
 ```elixir
