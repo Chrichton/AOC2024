@@ -66,7 +66,7 @@ defmodule Day4 do
     |> Enum.sum()
 
     diagonal_right_left_bottom_count =
-      Enum.map(0..(row_count-1), fn col ->
+      Enum.map(1..(row_count-1), fn col ->
         Enum.map((row_count-1)..col, fn row ->
           Enum.at(grid, row) |> Enum.at((row_count-1)-row+col)
         end)
@@ -74,9 +74,19 @@ defmodule Day4 do
       end)
       |> Enum.map(&row_count/1)
       |> Enum.sum()
+
+    diagonal_left_right_bottom_count =
+      Enum.map((row_count-1-1)..2, fn col ->
+        Enum.map((row_count-1)..(9-col), fn row ->
+          Enum.at(grid, row) |> Enum.at(col-abs(9-row))
+        end)
+        |> Enum.join()
+      end)
+      |> Enum.map(&row_count/1)
+      |> Enum.sum()          
     
-    {horizontal_count, vertical_count, diagonal_left_right_count, 
-      diagonal_right_left_count, diagonal_right_left_bottom_count}
+    horizontal_count + vertical_count + diagonal_left_right_count + diagonal_right_left_count + 
+      diagonal_right_left_bottom_count + diagonal_left_right_bottom_count
   end
 
   defp row_count(row) do
@@ -108,10 +118,12 @@ end
 <!-- livebook:{"output":true} -->
 
 ```
-{:module, Day4, <<70, 79, 82, 49, 0, 0, 19, ...>>, {:solve2, 1}}
+{:module, Day4, <<70, 79, 82, 49, 0, 0, 22, ...>>, {:solve2, 1}}
 ```
 
 ## solve1
+
+3358 too high
 
 ```elixir
 Kino.Input.read(input)
@@ -121,7 +133,7 @@ Kino.Input.read(input)
 <!-- livebook:{"output":true} -->
 
 ```
-{5, 3, 3, 1, 4}
+18
 ```
 
 ```elixir
