@@ -1,0 +1,277 @@
+<!-- livebook:{"persist_outputs":true} -->
+
+# AoC 2024/05
+
+```elixir
+Mix.install([
+  {:kino, "~> 0.14.2"}
+])
+```
+
+## Section
+
+```elixir
+input = Kino.Input.textarea("input")
+```
+
+```elixir
+defmodule Day5 do
+  def parse_input(input) do
+    [rules_str, updates_str] = String.split(input, "\n\n")
+    
+    rules = 
+      rules_str
+      |> String.split("\n")
+      |> Enum.map(fn rule_str ->
+        [from_str, to_str] = String.split(rule_str, "|")
+        {String.to_integer(from_str), String.to_integer(to_str)}
+      end)
+      |> Enum.group_by(fn {from, _to} -> from end, fn {_from, to} -> to end)
+     
+    updates = 
+      updates_str
+      |> String.split("\n")
+      |> Enum.map(fn pages_str -> 
+        String.split(pages_str, ",")
+        |> Enum.map(&String.to_integer/1)
+      end)
+
+    {rules, updates}
+  end
+
+  def solve1(input) do
+    parse_input(input)
+    |> check_rules_updates()
+    |> Enum.filter(fn {result, _} -> result end)
+    |> Enum.map(fn {_, update} -> middle_page_number(update) end)
+    |> Enum.sum()
+  end
+
+  def check_rules_updates({rules, updates}) do
+    Enum.map(updates, fn update ->
+      check_rules_update({rules, update})
+    end)
+  end
+
+  def check_rules_update({rules, update}) do
+    Enum.reduce_while(update, {MapSet.new(), update}, fn page, {processed_pages, update} ->
+      case Map.fetch(rules, page) do
+        {:ok, to_be_printed_after_pages} ->  
+          if MapSet.intersection(processed_pages, MapSet.new(to_be_printed_after_pages)) == MapSet.new() do
+            {:cont, {MapSet.put(processed_pages, page), update}}
+          else
+            {:halt, {false, update}}
+          end
+          _ -> {:cont, {MapSet.put(processed_pages, page), update}}
+      end
+    end)
+  end
+  
+  def middle_page_number(update) do
+    middle_index = div(Enum.count(update), 2)   
+    Enum.at(update, middle_index)
+  end
+  
+  def solve2(input) do
+    input
+    |> parse_input()
+    |> then(fn {rules, updates} ->
+      check_rules_updates({rules, updates})
+      |> Enum.reject(fn {result, _} -> result end)
+      |> Enum.map(fn {_result, update} -> update end)
+      |> then(fn updates -> 
+        find_correctly_ordered_updates({rules, updates})
+        |> Enum.filter(fn {result, _} -> result end)
+      end)
+    end)  
+  end
+
+  def find_correctly_ordered_updates({rules, updates}) do
+    Enum.map(updates, fn update ->   
+      find_correctly_ordered_update({rules, update})
+    end)
+  end
+  
+  def find_correctly_ordered_update({rules, update}) do
+    Enum.map(permutations(update), fn permutation -> 
+      case check_rules_update({rules, permutation}) do
+        {:false, _} -> {:cont, permutation}
+        _ -> {:halt, permutation}
+      end
+    end)
+  end
+
+  def permutations([]), do: [[]]
+  def permutations(list) do 
+    for elem <- list, rest <- permutations(list--[elem]), do: 
+      ([elem|rest])
+  end
+end
+```
+
+<!-- livebook:{"output":true} -->
+
+```
+{:module, Day5, <<70, 79, 82, 49, 0, 0, 27, ...>>, {:permutations, 1}}
+```
+
+## solve1
+
+```elixir
+Kino.Input.read(input)
+|> Day5.solve1()
+```
+
+<!-- livebook:{"output":true} -->
+
+```
+[
+  {MapSet.new([29, 47, 53, 61, 75]), [75, 47, 61, 53, 29]},
+  {MapSet.new([13, 29, 53, 61, 97]), [97, 61, 53, 29, 13]},
+  {MapSet.new([13, 29, 75]), [75, 29, 13]}
+]
+```
+
+```elixir
+input
+|> Kino.Input.read()
+|> Day5.parse_input()
+```
+
+<!-- livebook:{"output":true} -->
+
+```
+{%{
+   29 => ~c"\r",
+   47 => [53, 13, 61, 29],
+   53 => [29, 13],
+   61 => [13, 53, 29],
+   75 => [29, 53, 47, 61, 13],
+   97 => [13, 61, 47, 29, 53, 75]
+ },
+ [
+   [75, 47, 61, 53, 29],
+   [97, 61, 53, 29, 13],
+   [75, 29, 13],
+   ~c"Ka/=5",
+   [61, 13, 29],
+   [97, 13, 75, 29, 47]
+ ]}
+```
+
+## solve2
+
+```elixir
+Kino.Input.read(input)
+|> Day5.solve2()
+```
+
+```elixir
+rules = [   
+   {47, 13},
+   {75, 47},
+   {97, 75},
+   {47, 61},
+   {75, 61},
+   {47, 29},
+   {75, 13},
+   {53, 13}
+ ]
+|> Enum.group_by(fn {from, _to} -> from end, fn {_from, to} -> to end)
+```
+
+<!-- livebook:{"output":true} -->
+
+```
+%{47 => [13, 61, 29], 53 => ~c"\r", 75 => ~c"/=\r", 97 => ~c"K"}
+```
+
+```elixir
+rules = %{75 => [29, 53, 47, 61, 13]}
+```
+
+<!-- livebook:{"output":true} -->
+
+```
+%{75 => [29, 53, 47, 61, 13]}
+```
+
+```elixir
+updates = [[97, 13, 75, 29, 47]]
+```
+
+<!-- livebook:{"output":true} -->
+
+```
+[[97, 13, 75, 29, 47]]
+```
+
+```elixir
+Day5.check_rules_updates({rules, updates})
+```
+
+<!-- livebook:{"output":true} -->
+
+```
+[false: [97, 13, 75, 29, 47]]
+```
+
+```elixir
+rules = %{
+   29 => ~c"\r",
+   47 => [53, 13, 61, 29],
+   53 => [29, 13],
+   61 => [13, 53, 29],
+   75 => [29, 53, 47, 61, 13],
+   97 => [13, 61, 47, 29, 53, 75]
+ }
+```
+
+<!-- livebook:{"output":true} -->
+
+```
+%{
+  29 => ~c"\r",
+  47 => [53, 13, 61, 29],
+  53 => [29, 13],
+  61 => [13, 53, 29],
+  75 => [29, 53, 47, 61, 13],
+  97 => [13, 61, 47, 29, 53, 75]
+}
+```
+
+```elixir
+Day5.check_rules_updates({rules, [[97,13,75,29,47]]})
+```
+
+<!-- livebook:{"output":true} -->
+
+```
+[false: [97, 13, 75, 29, 47]]
+```
+
+```elixir
+defmodule Test do
+  def permutations([]), do: [[]]
+  def permutations(list) do 
+    for elem <- list, rest <- permutations(list--[elem]), do: 
+      ([elem|rest])
+  end
+end
+```
+
+<!-- livebook:{"output":true} -->
+
+```
+{:module, Test, <<70, 79, 82, 49, 0, 0, 7, ...>>, {:permutations, 1}}
+```
+
+```elixir
+Test.permutations([13, 53, 29])
+```
+
+<!-- livebook:{"output":true} -->
+
+```
+[[13, 53, 29], [13, 29, 53], [53, 13, 29], [53, 29, 13], [29, 13, 53], [29, 53, 13]]
+```
