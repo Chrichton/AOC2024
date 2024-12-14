@@ -49,21 +49,17 @@ defmodule Day5 do
 
   def check_rules_updates({rules, updates}) do
     Enum.map(updates, fn update ->
-      check_rules_update({rules, update})
-    end)
-  end
-
-  def check_rules_update({rules, update}) do
-    Enum.reduce_while(update, {MapSet.new(), update}, fn page, {processed_pages, update} ->
-      case Map.fetch(rules, page) do
-        {:ok, to_be_printed_after_pages} ->  
-          if MapSet.intersection(processed_pages, MapSet.new(to_be_printed_after_pages)) == MapSet.new() do
-            {:cont, {MapSet.put(processed_pages, page), update}}
-          else
-            {:halt, {false, update}}
-          end
-          _ -> {:cont, {MapSet.put(processed_pages, page), update}}
-      end
+      Enum.reduce_while(update, {MapSet.new(), update}, fn page, {processed_pages, update} ->
+        case Map.fetch(rules, page) do
+          {:ok, to_be_printed_after_pages} ->  
+            if MapSet.intersection(processed_pages, MapSet.new(to_be_printed_after_pages)) == MapSet.new() do
+              {:cont, {MapSet.put(processed_pages, page), update}}
+            else
+              {:halt, {false, update}}
+            end
+            _ -> {:cont, {MapSet.put(processed_pages, page), update}}
+        end
+      end)
     end)
   end
   
@@ -81,23 +77,16 @@ defmodule Day5 do
       |> Enum.map(fn {_result, update} -> update end)
       |> then(fn updates -> 
         find_correctly_ordered_updates({rules, updates})
-        |> Enum.filter(fn {result, _} -> result end)
+        |> Enum.map(fn update ->
+          Enum.filter(update, fn {result, _} -> result end)
+        end)
       end)
     end)  
   end
 
   def find_correctly_ordered_updates({rules, updates}) do
     Enum.map(updates, fn update ->   
-      find_correctly_ordered_update({rules, update})
-    end)
-  end
-  
-  def find_correctly_ordered_update({rules, update}) do
-    Enum.map(permutations(update), fn permutation -> 
-      case check_rules_update({rules, permutation}) do
-        {:false, _} -> {:cont, permutation}
-        _ -> {:halt, permutation}
-      end
+      check_rules_updates({rules, permutations(update)})
     end)
   end
 
@@ -112,7 +101,7 @@ end
 <!-- livebook:{"output":true} -->
 
 ```
-{:module, Day5, <<70, 79, 82, 49, 0, 0, 27, ...>>, {:permutations, 1}}
+{:module, Day5, <<70, 79, 82, 49, 0, 0, 26, ...>>, {:permutations, 1}}
 ```
 
 ## solve1
@@ -125,11 +114,7 @@ Kino.Input.read(input)
 <!-- livebook:{"output":true} -->
 
 ```
-[
-  {MapSet.new([29, 47, 53, 61, 75]), [75, 47, 61, 53, 29]},
-  {MapSet.new([13, 29, 53, 61, 97]), [97, 61, 53, 29, 13]},
-  {MapSet.new([13, 29, 75]), [75, 29, 13]}
-]
+143
 ```
 
 ```elixir
@@ -164,6 +149,16 @@ input
 ```elixir
 Kino.Input.read(input)
 |> Day5.solve2()
+```
+
+<!-- livebook:{"output":true} -->
+
+```
+[
+  [{MapSet.new([47, 53, 61, 75, 97]), ~c"aK/=5"}],
+  [{MapSet.new([13, 29, 61]), [61, 29, 13]}],
+  [{MapSet.new([13, 29, 47, 75, 97]), [97, 75, 47, 29, 13]}]
+]
 ```
 
 ```elixir
