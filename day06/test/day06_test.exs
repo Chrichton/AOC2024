@@ -14,7 +14,6 @@ defmodule Day06Test do
   end
 
   test "star2" do
-    # too high
-    assert Day06.solve2("star") == 1563
+    assert Day06.solve2("star") == 1562
   end
 end

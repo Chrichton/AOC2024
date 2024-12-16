@@ -103,7 +103,7 @@ defmodule Day06 do
       for(
         x <- 0..max_x,
         y <- 0..max_y,
-        obstacles = MapSet.put(obstacles, {x - 1, y}),
+        obstacles = put_obstacles(obstacles, {x, y}, start),
         do: loop?(start, obstacles, max_x, max_y, MapSet.new([{start, :north}]))
       )
       |> Enum.filter(& &1)
@@ -111,8 +111,13 @@ defmodule Day06 do
     end)
   end
 
+  defp put_obstacles(obstacles, {x, y} = point, start) do
+    if point != start and x > 0,
+      do: MapSet.put(obstacles, {x - 1, y}),
+      else: obstacles
+  end
+
   defp loop?(start, obstacles, max_x, max_y, visited) do
-    obstacles = MapSet.reject(obstacles, fn {x, _y} -> x < 0 end)
     next_step_find_loop?({start, :north}, start, obstacles, max_x, max_y, visited)
   end
 
