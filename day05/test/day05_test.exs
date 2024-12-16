@@ -13,7 +13,9 @@ defmodule Day05Test do
     assert Day05.solve2("sample") == 123
   end
 
+  # @tag :skip
+  @tag timeout: :infinity
   test "star2" do
-    # assert Day05.solve2("star") == 1562
+    assert Day05.solve2("star") == 1562
   end
 end
