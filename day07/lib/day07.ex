@@ -57,32 +57,30 @@ defmodule Day07 do
     end
 
     # Example usage:
-    # my_list = [1, 2, 3, 4]
+    # my_list = [1, 2]
 
     # permutations = Combinatorics.permutations_with_repetition(my_list, 2)
     # IO.inspect(permutations)
-    # Output: [[1, 1], [1, 2], [1, 3], [1, 4], [2, 1], [2, 2], [2, 3], [2, 4], [3, 1], [3, 2], [3, 3], [3, 4], [4, 1], [4, 2], [4, 3], [4, 4]]
+    # Output: [[1, 1], [1, 2], [2, 1], [2, 2]]
 
     # combinations = Combinatorics.combinations(my_list, 2)
     # IO.inspect(combinations)
-    # Output: [[1, 2], [1, 3], [1, 4], [2, 3], [2, 4], [3, 4]]
+    # Output: [[1, 2]]
 
     # permutations = Combinatorics.permutations(my_list, 2)
     # IO.inspect(permutations)
-    # Output: [[1, 2], [2, 1], [1, 3], [3, 1], [1, 4], [4, 1], [2, 3], [3, 2], [2, 4], [4, 2], [3, 4], [4, 3]]
+    # Output: [[1, 2], [2, 1]]
   end
 
   # @number_to_operator %{
   #   1 => fn x, y -> x + y end,
   #   2 => fn x, y -> x * y end,
-  #   3 => fn x, y -> x - y end,
-  #   4 => fn x, y -> x / y end
   # }
 
   def read_input(input) do
     input
     |> File.read!()
-    |> String.split("\n")
+    |> String.split("\n", trim: true)
     |> Enum.map(&parse_string/1)
   end
 
@@ -97,13 +95,12 @@ defmodule Day07 do
   def solve(input) do
     input
     |> read_input()
-    |> Enum.map(fn {_test_value, numbers} ->
-      operations(numbers)
-      # IO.inspect(combinations, label: "combinations")
-      # |> Enum.reduce(0, fn -> {op1.(b, c), op2.(b, d)} end)
-
-      # |> Enum.map(fn {x, y} -> op1.(x, y) end)
+    |> Stream.map(fn {test_value, numbers} ->
+      can_numbers_produce_test_value?(test_value, numbers)
     end)
+    |> Stream.filter(fn {success, _} -> success end)
+    |> Stream.map(fn {_, result} -> result end)
+    |> Enum.sum()
   end
 
   def can_numbers_produce_test_value?(test_value, numbers) do
@@ -112,42 +109,34 @@ defmodule Day07 do
       result = calculate_result(numbers, operation)
 
       if result == test_value,
-        do: {:halt, true},
-        else: {:cont, false}
+        do: {:halt, {true, result}},
+        else: {:cont, {false, result}}
     end)
   end
 
-  def calculate_result(numbers, operation) do
-    numbers
-    |> Enum.reduce(0, fn number, result ->
-      operation.(result, number)
-    end)
+  def calculate_result([result], []), do: result
+
+  def calculate_result([first_number | [second_number | numbers]], [operation | operations]) do
+    result = operation.(first_number, second_number)
+
+    calculate_result([result | numbers], operations)
   end
 
   def operations_map() do
     %{
       1 => fn x, y -> x + y end,
-      2 => fn x, y -> x * y end,
-      3 => fn x, y -> x - y end,
-      4 => fn x, y -> x / y end
+      2 => fn x, y -> x * y end
     }
   end
 
   def operations(params) do
-    IO.inspect(params, label: "params")
     operations_map = operations_map()
 
-    Day07.Combinatorics.permutations_with_repetition(1..4, Enum.count(params) - 1)
-    |> Enum.flat_map(fn operator_indices ->
+    Day07.Combinatorics.permutations_with_repetition(1..2, Enum.count(params) - 1)
+    |> Enum.map(fn operator_indices ->
       Enum.map(operator_indices, fn operator_index ->
         operations_map[operator_index]
       end)
-
-      # |> Enum.reduce(0, fn _operation, acc ->
-      #   acc
-      # end)
     end)
   end
 end
-
-[[1.85188841], [2.85188841], [3.85188841], [4.85188841]]
