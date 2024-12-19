@@ -129,14 +129,32 @@ defmodule Day07 do
     }
   end
 
-  def operations(params) do
-    operations_map = operations_map()
+  def operations_map_part2() do
+    %{
+      1 => fn x, y -> x + y end,
+      2 => fn x, y -> x * y end,
+      3 => fn x, y -> concat_integers(x, y) end
+    }
+  end
 
-    Day07.Combinatorics.permutations_with_repetition(1..2, Enum.count(params) - 1)
+  def operations(params) do
+    operations_map = operations_map_part2()
+
+    operations_count =
+      operations_map
+      |> Map.keys()
+      |> Enum.count()
+
+    Day07.Combinatorics.permutations_with_repetition(1..operations_count, Enum.count(params) - 1)
     |> Enum.map(fn operator_indices ->
       Enum.map(operator_indices, fn operator_index ->
         operations_map[operator_index]
       end)
     end)
+  end
+
+  def concat_integers(integer1, integer2) do
+    (:erlang.integer_to_list(integer1) ++ :erlang.integer_to_list(integer2))
+    |> :erlang.list_to_integer()
   end
 end
