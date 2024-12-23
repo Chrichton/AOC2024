@@ -33,14 +33,19 @@ defmodule Day08 do
     |> read_input()
   end
 
-  def manhattan_distance({x1, y1}, {x2, y2}) do
-    abs(x1 - x2) + abs(y1 - y2)
+  def anti_nodes({x1, y1}, {x2, y2}) when x1 < x2 and y1 < y2 do
+    [{2 * x2 - x1}, {2 * y2 - y1}]
   end
 
-  def anti_nodes({x1, y1}, {x2, y2}) do
-    dx = x1 - x2
-    dy = y1 - y2
+  def anti_nodes({x1, y1} = p1, {x2, y2} = p2) when x1 > x2 and y1 > y2 do
+    anti_nodes(p2, p1)
+  end
 
-    {dx, dy}
+  def anti_nodes({x1, y1}, {x2, y2}) when x1 < x2 and y1 > y2 do
+    [{2 * x2 - x1}, {2 * y1 - y2}]
+  end
+
+  def anti_nodes({x1, y1}, {x2, y2}) when x1 > x2 and y1 < y2 do
+    [{2 * x1 - x2}, {2 * y2 - y1}]
   end
 end
