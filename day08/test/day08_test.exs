@@ -2,19 +2,17 @@ defmodule Day08Test do
   use ExUnit.Case
   doctest Day08
 
-  @tag :skip
   test "read_input" do
-    assert Day08.read_input("sample") == [
-             [{4, 4}, {3, 7}],
-             [{4, 4}, {2, 5}],
-             [{3, 7}, {2, 5}],
-             [{4, 4}, {1, 8}],
-             [{3, 7}, {1, 8}],
-             [{2, 5}, {1, 8}],
-             [{9, 9}, {8, 8}],
-             [{9, 9}, {5, 6}],
-             [{8, 8}, {5, 6}]
-           ]
+    assert Day08.read_input("sample") ==
+             {[
+                {"0", {1, 8}},
+                {"0", {2, 5}},
+                {"0", {3, 7}},
+                {"0", {4, 4}},
+                {"A", {5, 6}},
+                {"A", {8, 8}},
+                {"A", {9, 9}}
+              ], 12, 12}
   end
 
   test "anti_nodes1" do
@@ -52,8 +50,7 @@ defmodule Day08Test do
   end
 
   test "star" do
-    # too high
-    assert Day08.solve("star") == 282
+    assert Day08.solve("star") == 222
   end
 
   # test "sample2" do
