@@ -15,7 +15,7 @@ defmodule Day08Test do
               ], 12, 12}
   end
 
-  test "anti_nodes1" do
+  test "anti_nodes_left_right" do
     _grid =
       """
       ..........
@@ -33,7 +33,7 @@ defmodule Day08Test do
     assert Day08.anti_nodes({3, 4}, {5, 5}) == [{1, 3}, {7, 6}]
   end
 
-  test "anti_nodes2" do
+  test "anti_nodes_right_left" do
     _grid =
       """
       ...........#
@@ -53,12 +53,48 @@ defmodule Day08Test do
     assert Day08.solve("star") == 222
   end
 
-  # test "sample2" do
-  #   assert Day08.solve2("sample") == 6
-  # end
+  test "anti_nodes2_left_right" do
+    _grid =
+      """
+      #.........
+      ..........
+      .T........
+      ..........
+      ..T.......
+      ..........
+      ...#......
+      ..........
+      ....#.....
+      ..........
+      """
 
-  # test "star2" do
-  #   # too high
-  #   assert Day08.solve2("star") == 1563
-  # end
+    assert Day08.anti_nodes2({2, 1}, {4, 2}, 10, 10) == [{8, 4}, {6, 3}, {0, 0}]
+  end
+
+  test "anti_nodes2_right_left" do
+    _grid =
+      """
+      ..........
+      .........#
+      .......T..
+      .....T....
+      ...#......
+      .#........
+      ..........
+      ..........
+      ..........
+      ..........
+      """
+
+    assert Day08.anti_nodes2({2, 7}, {3, 5}, 10, 10) == [{5, 1}, {4, 3}, {1, 9}]
+  end
+
+  # @tag :skip
+  test "sample2" do
+    assert Day08.solve2("sample") == 34
+  end
+
+  test "star2" do
+    assert Day08.solve2("star") == 884
+  end
 end
