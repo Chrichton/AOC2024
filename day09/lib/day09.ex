@@ -23,40 +23,51 @@ defmodule Day09 do
     |> elem(0)
   end
 
-  def move_file_blocks_recursive(list, left_index, count) do
-    current = Enum.at(list, left_index)
+  def dense_format_to_map(dense_format) do
+    dense_format
+    |> String.graphemes()
+    |> Enum.with_index()
+    |> Map.new(fn {value, key} -> {key, value} end)
+  end
 
-    if current == "." do
-      right_index = count - index_of_first_not(Enum.reverse(list), ".") - 1
+  def map_to_dense_format(map) do
+    map
+    |> Map.keys()
+    |> Enum.sort(:asc)
+    |> Enum.map(fn key -> map[key] end)
+    |> Enum.join()
+  end
 
-      if left_index < right_index do
-        list
-        |> List.replace_at(left_index, Enum.at(list, right_index))
-        |> List.replace_at(right_index, ".")
-        |> move_file_blocks_recursive(left_index + 1, count)
-      else
-        Enum.join(list, "")
-      end
+  def move_file_blocks_recursive(map, left_index, right_index)
+      when left_index >= right_index,
+      do: map_to_dense_format(map)
+
+  def move_file_blocks_recursive(map, left_index, right_index) do
+    if map[left_index] == "." do
+      Map.put(map, left_index, map[right_index])
+      |> Map.put(right_index, ".")
+      |> move_file_blocks_recursive(
+        left_index + 1,
+        index_of_last_not(map, right_index - 1)
+      )
     else
-      move_file_blocks_recursive(list, left_index + 1, count)
+      move_file_blocks_recursive(map, left_index + 1, index_of_last_not(map, right_index))
     end
   end
 
   def move_file_blocks(dense_format) do
-    list = String.graphemes(dense_format)
-    count = Enum.count(list)
+    map = dense_format_to_map(dense_format)
+    max_index = String.length(dense_format) - 1
+    right_index = index_of_last_not(map, max_index)
 
-    move_file_blocks_recursive(list, 0, count)
+    move_file_blocks_recursive(map, 0, right_index)
   end
 
-  def index_of_first_not(list, char) do
-    list
-    |> Enum.with_index()
-    |> Enum.find(fn {element, _index} -> element != char end)
-    |> case do
-      nil -> nil
-      {_element, index} -> index
-    end
+  def index_of_last_not(map, right_index) do
+    right_index..0
+    |> Stream.drop_while(fn index -> map[index] == "." end)
+    |> Enum.take(1)
+    |> hd()
   end
 
   def checksum(block_string) do
