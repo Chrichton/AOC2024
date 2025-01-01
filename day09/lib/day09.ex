@@ -4,7 +4,7 @@ defmodule Day09 do
     |> File.read!()
   end
 
-  def from_dense_format(input) do
+  def to_dense_format(input) do
     flip_stream =
       Stream.iterate(:file_length, fn flip ->
         if flip == :file_length,
@@ -82,7 +82,7 @@ defmodule Day09 do
   def solve(input) do
     input
     |> read_input()
-    |> from_dense_format()
+    |> to_dense_format()
     |> move_file_blocks()
     |> checksum()
   end

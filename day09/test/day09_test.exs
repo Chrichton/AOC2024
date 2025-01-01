@@ -5,8 +5,8 @@ defmodule Day09Test do
     assert Day09.read_input("sample") == "2333133121414131402"
   end
 
-  test "dense_format" do
-    assert Day09.from_dense_format("12345") == "0..111....22222"
+  test "to_dense_format" do
+    assert Day09.to_dense_format("12345") == "0..111....22222"
   end
 
   test "dense_format_to_map" do
